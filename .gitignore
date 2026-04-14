@@ -1,0 +1,92 @@
+# .NET build artifacts
+bin/
+obj/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Rider-specific
+.idea/
+*.sln.iml
+
+# macOS system files
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# VS Code (if used)
+.vscode/
+
+# User-specific files
+*.swp
+*.bak
+*.tmp
+*.orig
+*.rej
+
+# NuGet packages
+*.nupkg
+# The packages folder can be ignored if you use package restore
+**/packages/*
+!**/packages/build/
+!**/packages/repositories.config
+
+# Resharper (if used)
+_ReSharper*/
+*.[Rr]e[Ss]harper
+
+# Rider logs
+.idea/.idea.*
+.idea/.idea_modules/
+.idea/.name
+.idea/.rider.*
+
+# Local test results
+TestResults/
+CoverageReport/
+
+# ASP.NET Core specific
+appsettings.Development.json
+appsettings.*.json
+
+# MAUI specific
+# Device and platform build outputs
+*.apk
+*.aab
+*.ap_
+*.ipa
+*.xcarchive
+*.xcuserstate
+*.xcworkspace
+*.xcodeproj
+*.xcuserdata
+*.ds_store
+*.userprefs
+*.vs/
+*.vscode/
+*.vsconfig
+
+# MAUI generated files
+Platforms/Android/obj/
+Platforms/Android/bin/
+Platforms/iOS/obj/
+Platforms/iOS/bin/
+Platforms/MacCatalyst/obj/
+Platforms/MacCatalyst/bin/
+Platforms/Windows/obj/
+Platforms/Windows/bin/
+
+# Snapshots and crash logs
+*.crash
+*.log
+
+# Other
+*.db
+*.sqlite
