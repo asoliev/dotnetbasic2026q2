@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="GreetingConsole/GreetingConsole.csproj" />
+  <Project Path="GreetingLibrary/GreetingLibrary.csproj" />
+  <Project Path="GreetingWinForm/GreetingWinForm.csproj" />
+  <Project Path="GreetingWpfApp/GreetingWpfApp.csproj" />
+  <Project Path="MauiApp1/MauiApp1.csproj" />
+</Solution>
