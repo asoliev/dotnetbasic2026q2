@@ -1,4 +1,5 @@
 <Solution>
   <Project Path="GreetingConsole/GreetingConsole.csproj" />
   <Project Path="GreetingWinForm/GreetingWinForm.csproj" Id="8b75f79b-2600-4a6f-a638-054756879ffc" />
+  <Project Path="GreetingWpfApp/GreetingWpfApp.csproj" Id="b625fa95-493d-498d-95bf-42ea412ed89e" />
 </Solution>

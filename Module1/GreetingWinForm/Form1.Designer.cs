@@ -28,49 +28,50 @@ partial class Form1
     /// </summary>
     private void InitializeComponent()
     {
-        buttonGreet = new Button();
-        textBoxUsername = new TextBox();
+        btnGreet = new Button();
+        txtUsername = new TextBox();
         labelUsername = new Label();
         SuspendLayout();
         // 
-        // buttonGreet
+        // btnGreet
         // 
-        buttonGreet.Location = new Point(86, 111);
-        buttonGreet.Margin = new Padding(4, 5, 4, 5);
-        buttonGreet.Name = "buttonGreet";
-        buttonGreet.Size = new Size(96, 32);
-        buttonGreet.TabIndex = 1;
-        buttonGreet.Text = "Greet";
-        buttonGreet.UseVisualStyleBackColor = true;
-        buttonGreet.Click += buttonGreet_Click;
+        btnGreet.Location = new Point(86, 86);
+        btnGreet.Margin = new Padding(4, 5, 4, 5);
+        btnGreet.Name = "btnGreet";
+        btnGreet.Size = new Size(96, 32);
+        btnGreet.TabIndex = 1;
+        btnGreet.Text = "Greet";
+        btnGreet.UseVisualStyleBackColor = true;
+        btnGreet.Click += BtnGreet_Click;
         // 
-        // textBoxUsername
+        // txtUsername
         // 
-        textBoxUsername.Location = new Point(13, 75);
-        textBoxUsername.Margin = new Padding(4, 5, 4, 5);
-        textBoxUsername.MaxLength = 30;
-        textBoxUsername.Name = "textBoxUsername";
-        textBoxUsername.Size = new Size(256, 29);
-        textBoxUsername.TabIndex = 0;
+        txtUsername.Location = new Point(13, 50);
+        txtUsername.Margin = new Padding(4, 5, 4, 5);
+        txtUsername.MaxLength = 20;
+        txtUsername.Name = "txtUsername";
+        txtUsername.Size = new Size(250, 29);
+        txtUsername.TabIndex = 0;
+        txtUsername.KeyDown += TxtUsername_KeyDown;
         // 
         // labelUsername
         // 
         labelUsername.AutoSize = true;
-        labelUsername.Location = new Point(13, 49);
+        labelUsername.Location = new Point(13, 24);
         labelUsername.Margin = new Padding(4, 0, 4, 0);
         labelUsername.Name = "labelUsername";
-        labelUsername.Size = new Size(88, 21);
+        labelUsername.Size = new Size(128, 21);
         labelUsername.TabIndex = 2;
-        labelUsername.Text = "Your name:";
+        labelUsername.Text = "Enter your name:";
         // 
         // Form1
         // 
         AutoScaleDimensions = new SizeF(9F, 21F);
         AutoScaleMode = AutoScaleMode.Font;
-        ClientSize = new Size(284, 238);
+        ClientSize = new Size(284, 161);
         Controls.Add(labelUsername);
-        Controls.Add(textBoxUsername);
-        Controls.Add(buttonGreet);
+        Controls.Add(txtUsername);
+        Controls.Add(btnGreet);
         Font = new Font("Segoe UI", 12F);
         FormBorderStyle = FormBorderStyle.FixedToolWindow;
         Margin = new Padding(4, 5, 4, 5);
@@ -84,7 +85,7 @@ partial class Form1
 
     #endregion
 
-    private Button buttonGreet;
-    private TextBox textBoxUsername;
+    private Button btnGreet;
+    private TextBox txtUsername;
     private Label labelUsername;
 }
