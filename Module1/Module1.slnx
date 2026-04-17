@@ -1,7 +1,7 @@
 <Solution>
   <Project Path="GreetingConsole/GreetingConsole.csproj" />
-  <Project Path="GreetingLibrary/GreetingLibrary.csproj" Id="267de199-0ee7-4196-897f-b759892e4091" />
-  <Project Path="GreetingWinForm/GreetingWinForm.csproj" Id="8b75f79b-2600-4a6f-a638-054756879ffc" />
-  <Project Path="GreetingWpfApp/GreetingWpfApp.csproj" Id="b625fa95-493d-498d-95bf-42ea412ed89e" />
+  <Project Path="GreetingLibrary/GreetingLibrary.csproj" />
+  <Project Path="GreetingWinForm/GreetingWinForm.csproj" />
+  <Project Path="GreetingWpfApp/GreetingWpfApp.csproj" />
   <Project Path="MauiApp1/MauiApp1.csproj" />
 </Solution>
