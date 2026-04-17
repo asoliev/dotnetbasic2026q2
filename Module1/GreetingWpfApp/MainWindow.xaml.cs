@@ -22,4 +22,14 @@ public partial class MainWindow : Window
     }
     
     private void ShowGreeting() => MessageBox.Show(GreetingService.GetGreeting(txtUsername.Text));
+
+    protected override void OnPreviewKeyDown(KeyEventArgs e)
+    {
+        if (e.Key == Key.Escape)
+        {
+            Close();
+            e.Handled = true;
+        }
+        base.OnPreviewKeyDown(e);
+    }
 }

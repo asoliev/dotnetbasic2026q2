@@ -19,4 +19,14 @@ public partial class GreetingForm : Form
     }
 
     private void ShowGreeting() => MessageBox.Show(GreetingService.GetGreeting(txtUsername.Text));
+
+    protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+    {
+        if (keyData == Keys.Escape)
+        {
+            Close();
+            return true; // Mark as handled
+        }
+        return base.ProcessCmdKey(ref msg, keyData);
+    }
 }
