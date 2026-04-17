@@ -1,5 +1,6 @@
 using System.Windows;
 using System.Windows.Input;
+using GreetingLibrary;
 
 namespace GreetingWpfApp;
 /// <summary>
@@ -8,6 +9,7 @@ namespace GreetingWpfApp;
 public partial class MainWindow : Window
 {
     public MainWindow() => InitializeComponent();
+
     private void BtnGreet_Click(object sender, RoutedEventArgs e) => ShowGreeting();
 
     private void TxtUsername_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
@@ -19,5 +21,5 @@ public partial class MainWindow : Window
         }
     }
     
-    private void ShowGreeting() => MessageBox.Show($"Hello, {txtUsername.Text}");
+    private void ShowGreeting() => MessageBox.Show(GreetingService.GetGreeting(txtUsername.Text));
 }

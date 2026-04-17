@@ -1,3 +1,5 @@
+using GreetingLibrary;
+
 namespace GreetingWinForm;
 
 public partial class GreetingForm : Form
@@ -16,5 +18,5 @@ public partial class GreetingForm : Form
         }
     }
 
-    private void ShowGreeting() => MessageBox.Show($"Hello, {txtUsername.Text}");
+    private void ShowGreeting() => MessageBox.Show(GreetingService.GetGreeting(txtUsername.Text));
 }
