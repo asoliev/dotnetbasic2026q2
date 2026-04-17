@@ -8,14 +8,16 @@ namespace GreetingWpfApp;
 public partial class MainWindow : Window
 {
     public MainWindow() => InitializeComponent();
-    private void BtnGreet_Click(object sender, RoutedEventArgs e) => MessageBox.Show($"Hello, {txtUsername.Text}");
+    private void BtnGreet_Click(object sender, RoutedEventArgs e) => ShowGreeting();
 
     private void TxtUsername_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
     {
         if (e.Key == Key.Enter)
         {
-            MessageBox.Show($"Hello, {txtUsername.Text}");
+            ShowGreeting();
             e.Handled = true;
         }
     }
+    
+    private void ShowGreeting() => MessageBox.Show($"Hello, {txtUsername.Text}");
 }
