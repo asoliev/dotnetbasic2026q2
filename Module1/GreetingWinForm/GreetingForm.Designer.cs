@@ -1,6 +1,6 @@
 namespace GreetingWinForm;
 
-partial class Form1
+partial class GreetingForm
 {
     /// <summary>
     ///  Required designer variable.
@@ -64,7 +64,7 @@ partial class Form1
         labelUsername.TabIndex = 2;
         labelUsername.Text = "Enter your name:";
         // 
-        // Form1
+        // GreetingForm
         // 
         AutoScaleDimensions = new SizeF(9F, 21F);
         AutoScaleMode = AutoScaleMode.Font;
@@ -75,7 +75,7 @@ partial class Form1
         Font = new Font("Segoe UI", 12F);
         FormBorderStyle = FormBorderStyle.FixedToolWindow;
         Margin = new Padding(4, 5, 4, 5);
-        Name = "Form1";
+        Name = "GreetingForm";
         SizeGripStyle = SizeGripStyle.Hide;
         StartPosition = FormStartPosition.CenterScreen;
         Text = "GreetingForm";
