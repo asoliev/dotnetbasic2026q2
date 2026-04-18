@@ -38,12 +38,16 @@ namespace Task1
         {
             ArgumentNullException.ThrowIfNull(products);
             ArgumentNullException.ThrowIfNull(predicate);
-            for (int i = 0; i < products.Length; i++)
+
+            if (products.Length > 0)
             {
-                var product = products[i];
-                if (predicate(product))
+                for (int i = 0; i < products.Length; i++)
                 {
-                    return i;
+                    var product = products[i];
+                    if (predicate(product))
+                    {
+                        return i;
+                    }
                 }
             }
 
