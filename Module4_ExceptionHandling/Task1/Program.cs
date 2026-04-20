@@ -4,14 +4,26 @@ namespace Task1;
 
 internal static class Program
 {
-    private static void Main(string[] args)
+    private static int Main()
     {
-        while (true)
+        Console.CancelKeyPress += OnCancelKeyPress;
+
+        try
         {
-            string input = Console.ReadLine();
+            ProcessInputLines();
+            return 0;
+        }
+        finally
+        {
+            Console.CancelKeyPress -= OnCancelKeyPress;
+        }
+    }
 
-            if (input is null) break;
-
+    private static void ProcessInputLines()
+    {
+        string input;
+        while ((input = Console.ReadLine()) is not null)
+        {
             try
             {
                 PrintFirstCharacter(input);
@@ -29,5 +41,11 @@ internal static class Program
             throw new ArgumentException("Input cannot be an empty string.");
 
         Console.WriteLine(input[0]);
+    }
+
+    private static void OnCancelKeyPress(object sender, ConsoleCancelEventArgs e)
+    {
+        e.Cancel = true;
+        Environment.Exit(0);
     }
 }
