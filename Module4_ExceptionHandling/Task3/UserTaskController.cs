@@ -1,30 +1,22 @@
 ﻿using System;
 using Task3.DoNotChange;
 
-namespace Task3
+namespace Task3;
+
+public class UserTaskController(UserTaskService taskService)
 {
-    public class UserTaskController
+    public bool AddTaskForUser(int userId, string description, IResponseModel model)
     {
-        private readonly UserTaskService _taskService;
-
-        public UserTaskController(UserTaskService taskService)
+        try
         {
-            _taskService = taskService;
+            var task = new UserTask(description);
+            taskService.AddTaskForUser(userId, task);
+            return true;
         }
-
-        public bool AddTaskForUser(int userId, string description, IResponseModel model)
+        catch (Exception ex) when (ex is InvalidUserIdException or UserNotFoundException or TaskAlreadyExistsException)
         {
-            try
-            {
-                var task = new UserTask(description);
-                _taskService.AddTaskForUser(userId, task);
-                return true;
-            }
-            catch (Exception ex) when (ex is InvalidUserIdException || ex is UserNotFoundException || ex is TaskAlreadyExistsException)
-            {
-                model.AddAttribute("action_result", ex.Message);
-                return false;
-            }
+            model.AddAttribute("action_result", ex.Message);
+            return false;
         }
     }
 }

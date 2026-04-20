@@ -1,34 +1,25 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using Task3.DoNotChange;
 
-namespace Task3
+namespace Task3;
+
+public class UserTaskService(IUserDao userDao)
 {
-    public class UserTaskService
+    public void AddTaskForUser(int userId, UserTask task)
     {
-        private readonly IUserDao _userDao;
+        if (userId < 0)
+            throw new InvalidUserIdException();
 
-        public UserTaskService(IUserDao userDao)
-        {
-            _userDao = userDao;
-        }
+        IUser user = userDao.GetUser(userId);
+        if (user == null)
+            throw new UserNotFoundException();
 
-        public void AddTaskForUser(int userId, UserTask task)
-        {
-            if (userId < 0)
-                throw new InvalidUserIdException();
+        IList<UserTask> tasks = user.Tasks;
+        if (tasks.Any(t => string.Equals(task.Description, t.Description, StringComparison.OrdinalIgnoreCase)))
+            throw new TaskAlreadyExistsException();
 
-            var user = _userDao.GetUser(userId);
-            if (user == null)
-                throw new UserNotFoundException();
-
-            var tasks = user.Tasks;
-            foreach (var t in tasks)
-            {
-                if (string.Equals(task.Description, t.Description, StringComparison.OrdinalIgnoreCase))
-                    throw new TaskAlreadyExistsException();
-            }
-
-            tasks.Add(task);
-        }
+        tasks.Add(task);
     }
 }
