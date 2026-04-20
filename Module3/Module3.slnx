@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="Module3.FSVisitorCLI\Module3.FSVisitorCLI.csproj" />
+  <Project Path="Module3.FSVisitorLib\Module3.FSVisitorLib.csproj" />
+</Solution>
