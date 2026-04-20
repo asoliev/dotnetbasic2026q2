@@ -77,10 +77,10 @@ public class FileSystemVisitor : IEnumerable<string>
     private IEnumerable<string> ProcessDirectory(string dirPath)
     {
         AllDirectoriesFoundCount++;
-        if (ShouldContinue(DirectoryFound, dirPath, out bool dirExclude)) yield break;
+        if (!ShouldContinue(DirectoryFound, dirPath, out bool dirExclude)) yield break;
 
         if (dirExclude || (_filter != null && !_filter(dirPath))) yield break;
-        if (ShouldContinue(FilteredDirectoryFound, dirPath, out bool filteredDirExclude)) yield break;
+        if (!ShouldContinue(FilteredDirectoryFound, dirPath, out bool filteredDirExclude)) yield break;
         if (!filteredDirExclude) yield return dirPath;
     }
 
