@@ -4,14 +4,27 @@ namespace Module3.FSVisitorLib;
 
 public class FileSystemVisitor : IEnumerable<string>
 {
-    private readonly string _rootPath;
-    private readonly Func<string, bool> _filter;
+    #region fields and properties
 
-    // Constructor without filter (returns all files and folders)
-    public FileSystemVisitor(string rootPath) : this(rootPath, null) { }
+    private bool _abort;
+    private readonly string _rootPath;
+    private readonly Func<string, bool>? _filter;
+
+    public int AllFilesFoundCount { get; private set; }
+    public int AllDirectoriesFoundCount { get; private set; }
+
+    // Events
+    public event EventHandler<EventArgs>? SearchStarted;
+    public event EventHandler<EventArgs>? SearchFinished;
+    public event EventHandler<FileSystemVisitorEventArgs>? FileFound;
+    public event EventHandler<FileSystemVisitorEventArgs>? DirectoryFound;
+    public event EventHandler<FileSystemVisitorEventArgs>? FilteredFileFound;
+    public event EventHandler<FileSystemVisitorEventArgs>? FilteredDirectoryFound;
+
+    #endregion
 
     // Constructor with filter
-    public FileSystemVisitor(string rootPath, Func<string, bool> filter)
+    public FileSystemVisitor(string rootPath, Func<string, bool>? filter = null)
     {
         if (string.IsNullOrEmpty(rootPath))
             throw new ArgumentException("Root path cannot be null or empty.", nameof(rootPath));
@@ -23,30 +36,81 @@ public class FileSystemVisitor : IEnumerable<string>
     }
 
     // Custom iterator using yield
-    public IEnumerator<string> GetEnumerator() => Traverse(_rootPath).GetEnumerator();
+    public IEnumerator<string> GetEnumerator()
+    {
+        _abort = false;
+        AllFilesFoundCount = 0;
+        AllDirectoriesFoundCount = 0;
+
+        SearchStarted?.Invoke(this, EventArgs.Empty);
+
+        foreach (string item in Traverse(_rootPath))
+        {
+            if (_abort) break;
+            yield return item;
+        }
+
+        SearchFinished?.Invoke(this, EventArgs.Empty);
+    }
 
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
     private IEnumerable<string> Traverse(string currentPath)
     {
-        // Yield current directory if it matches filter (or if no filter)
-        if (_filter == null || _filter(currentPath))
-            yield return currentPath;
+        foreach (string dirResult in ProcessDirectory(currentPath))
+            yield return dirResult;
 
-        // Yield files
-        foreach (string file in Directory.GetFiles(currentPath))
-        {
-            if (_filter == null || _filter(file))
-                yield return file;
-        }
+        foreach (string fileResult in ProcessFiles(currentPath))
+            yield return fileResult;
 
-        // Recurse into subdirectories
-        foreach (string dir in Directory.GetDirectories(currentPath))
+        foreach (string subDir in Directory.GetDirectories(currentPath))
         {
-            foreach (string item in Traverse(dir))
+            if (_abort) yield break;
+            foreach (string item in Traverse(subDir))
             {
+                if (_abort) yield break;
                 yield return item;
             }
         }
+    }
+
+    private IEnumerable<string> ProcessDirectory(string dirPath)
+    {
+        AllDirectoriesFoundCount++;
+        if (ShouldContinue(DirectoryFound, dirPath, out bool dirExclude)) yield break;
+
+        if (dirExclude || (_filter != null && !_filter(dirPath))) yield break;
+        if (ShouldContinue(FilteredDirectoryFound, dirPath, out bool filteredDirExclude)) yield break;
+        if (!filteredDirExclude) yield return dirPath;
+    }
+
+    private IEnumerable<string> ProcessFiles(string dirPath)
+    {
+        foreach (string file in Directory.GetFiles(dirPath))
+        {
+            AllFilesFoundCount++;
+            if (!ShouldContinue(FileFound, file, out bool fileExclude)) yield break;
+
+            if (fileExclude || (_filter != null && !_filter(file))) continue;
+            if (!ShouldContinue(FilteredFileFound, file, out bool filteredFileExclude)) yield break;
+            if (!filteredFileExclude)
+                yield return file;
+        }
+    }
+
+    private bool ShouldContinue(EventHandler<FileSystemVisitorEventArgs>? handler, string path, out bool exclude)
+    {
+        exclude = false;
+        if (handler == null) return true;
+
+        var args = new FileSystemVisitorEventArgs(path);
+        handler(this, args);
+        if (args.Abort)
+        {
+            _abort = true;
+            return false;
+        }
+        exclude = args.Exclude;
+        return true;
     }
 }
