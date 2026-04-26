@@ -1,31 +1,22 @@
 ﻿using System;
 
-namespace Task1
+namespace Task1;
+public class Product(string name, double price)
 {
-    public class Product
+    public string Name { get; set; } = name;
+    public double Price { get; set; } = price;
+
+    public override bool Equals(object obj)
     {
-        public Product(string name, double price)
-        {
-            Name = name;
-            Price = price;
-        }
+        if (ReferenceEquals(this, obj))
+            return true;
 
-        public string Name { get; set; }
+        if (obj is not Product other)
+            return false;
 
-        public double Price { get; set; }
-
-        public override bool Equals(object obj)
-        {
-            if (ReferenceEquals(this, obj))
-                return true;
-
-            if (obj is not Product other)
-                return false;
-
-            return string.Equals(Name, other.Name, StringComparison.Ordinal)
-                && Price.Equals(other.Price);
-        }
-
-        public override int GetHashCode() => HashCode.Combine(Name, Price);
+        return string.Equals(Name, other.Name, StringComparison.Ordinal)
+            && Price.Equals(other.Price);
     }
+
+    public override int GetHashCode() => HashCode.Combine(Name, Price);
 }
