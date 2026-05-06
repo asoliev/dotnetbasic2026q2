@@ -63,7 +63,7 @@ public class FileSystemVisitor : IEnumerable<string>
         foreach (string fileResult in ProcessFiles(currentPath))
             yield return fileResult;
 
-        foreach (string subDir in Directory.GetDirectories(currentPath))
+        foreach (string subDir in SafeGetDirectories(currentPath))
         {
             if (_abort) yield break;
             foreach (string item in Traverse(subDir))
@@ -86,7 +86,7 @@ public class FileSystemVisitor : IEnumerable<string>
 
     private IEnumerable<string> ProcessFiles(string dirPath)
     {
-        foreach (string file in Directory.GetFiles(dirPath))
+        foreach (string file in SafeGetFiles(dirPath))
         {
             AllFilesFoundCount++;
             if (!ShouldContinue(FileFound, file, out bool fileExclude)) yield break;
@@ -95,6 +95,30 @@ public class FileSystemVisitor : IEnumerable<string>
             if (!ShouldContinue(FilteredFileFound, file, out bool filteredFileExclude)) yield break;
             if (!filteredFileExclude)
                 yield return file;
+        }
+    }
+
+    private static IEnumerable<string> SafeGetFiles(string path)
+    {
+        try
+        {
+            return Directory.GetFiles(path);
+        }
+        catch (Exception ex) when (ex is UnauthorizedAccessException or DirectoryNotFoundException or IOException)
+        {
+            return Array.Empty<string>();
+        }
+    }
+
+    private static IEnumerable<string> SafeGetDirectories(string path)
+    {
+        try
+        {
+            return Directory.GetDirectories(path);
+        }
+        catch (Exception ex) when (ex is UnauthorizedAccessException or DirectoryNotFoundException or IOException)
+        {
+            return Array.Empty<string>();
         }
     }
 

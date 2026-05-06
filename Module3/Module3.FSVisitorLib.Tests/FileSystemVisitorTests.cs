@@ -163,6 +163,35 @@ public class FileSystemVisitorTests
         Assert.Equal(1, visitor.AllFilesFoundCount);
     }
 
+    [Fact]
+    public void DeletedSubdirectoryDuringTraversal_DoesNotThrow_AndTraversalContinues()
+    {
+        using var fileSystem = new TemporaryFileSystem();
+        string volatileDirectory = fileSystem.CreateDirectory("volatile");
+        fileSystem.CreateFile(Path.Combine("volatile", "temp.txt"));
+        string stableDirectory = fileSystem.CreateDirectory("stable");
+        string stableFile = fileSystem.CreateFile(Path.Combine("stable", "keep.txt"));
+
+        var visitor = new FileSystemVisitor(fileSystem.RootPath);
+        var lifecycleEvents = new List<string>();
+
+        visitor.SearchStarted += (_, _) => lifecycleEvents.Add("SearchStarted");
+        visitor.DirectoryFound += (_, args) =>
+        {
+            if (Path.GetFullPath(args.Path) == Path.GetFullPath(volatileDirectory) && Directory.Exists(volatileDirectory))
+                Directory.Delete(volatileDirectory, recursive: true);
+        };
+        visitor.SearchFinished += (_, _) => lifecycleEvents.Add("SearchFinished");
+
+        Exception? exception = Record.Exception(() => visitor.ToList());
+
+        Assert.Null(exception);
+        Assert.Equal("SearchStarted", lifecycleEvents.First());
+        Assert.Equal("SearchFinished", lifecycleEvents.Last());
+        Assert.True(Directory.Exists(stableDirectory));
+        Assert.True(File.Exists(stableFile));
+    }
+
     private static void AssertPathsEqual(IEnumerable<string> expected, IEnumerable<string> actual)
     {
         string[] normalizedExpected = expected
