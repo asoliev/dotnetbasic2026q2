@@ -20,7 +20,9 @@ public class NumberParserTests
     [TestCase("-2147483648", ExpectedResult = int.MinValue)]
     [TestCase("2147483647", ExpectedResult = int.MaxValue)]
     [TestCase("-12034", ExpectedResult = -12034)]
+    [TestCase("   -12034", ExpectedResult = -12034)]
     [TestCase("-12034    ", ExpectedResult = -12034)]
+    [TestCase("   +007   ", ExpectedResult = 7)]
     public int Parse_ValidNumberString_ReturnsInt32Value(string stringValue)
     {
         return _parser.Parse(stringValue);

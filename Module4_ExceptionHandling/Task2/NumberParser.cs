@@ -8,8 +8,7 @@ public class NumberParser : INumberParser
     {
         ArgumentNullException.ThrowIfNull(stringValue);
 
-        // Trim trailing whitespace (tests show trailing spaces are allowed)
-        string trimmed = stringValue.TrimEnd();
+        string trimmed = stringValue.Trim();
 
         if (trimmed.Length == 0)
             throw new FormatException("Input string was not in a correct format.");
