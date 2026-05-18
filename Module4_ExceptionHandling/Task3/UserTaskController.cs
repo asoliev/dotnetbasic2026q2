@@ -13,7 +13,7 @@ public class UserTaskController(UserTaskService taskService)
             taskService.AddTaskForUser(userId, task);
             return true;
         }
-        catch (Exception ex) when (ex is InvalidUserIdException or UserNotFoundException or TaskAlreadyExistsException)
+        catch (UserTaskException ex)
         {
             model.AddAttribute("action_result", ex.Message);
             return false;

@@ -2,6 +2,8 @@ using System;
 
 namespace Task3;
 
-public class InvalidUserIdException() : Exception("Invalid userId");
-public class UserNotFoundException() : Exception("User not found");
-public class TaskAlreadyExistsException() : Exception("The task already exists");
+public abstract class UserTaskException(string message) : Exception(message);
+
+public class InvalidUserIdException() : UserTaskException("Invalid userId");
+public class UserNotFoundException() : UserTaskException("User not found");
+public class TaskAlreadyExistsException() : UserTaskException("The task already exists");
