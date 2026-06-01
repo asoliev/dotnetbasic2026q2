@@ -1,56 +1,70 @@
 using Task1;
-using System.Globalization;
 
-string tempDirectory = Path.Combine(Path.GetTempPath(), "Module5_Reflection_Task1_Tests", Guid.NewGuid().ToString("N"));
-Directory.CreateDirectory(tempDirectory);
+string baseDirectory = AppContext.BaseDirectory;
+string fileSettingsPath = Path.Combine(baseDirectory, "task1.settings");
+string jsonSettingsPath = Path.Combine(baseDirectory, "appsettings.json");
 
 try
 {
-    RunFileProviderTests(tempDirectory);
-    RunJsonProviderTests(tempDirectory);
-    RunBaseClassRoundtripTests(tempDirectory);
+    RunFileProviderTests(fileSettingsPath);
+    RunJsonProviderTests(jsonSettingsPath);
+    RunBaseClassRoundtripTests(fileSettingsPath, jsonSettingsPath);
 
     Console.WriteLine("All Task1 tests passed.");
-    return;
 }
 finally
 {
-    if (Directory.Exists(tempDirectory))
-        Directory.Delete(tempDirectory, recursive: true);
+    if (File.Exists(fileSettingsPath))
+        File.Delete(fileSettingsPath);
+
+    if (File.Exists(jsonSettingsPath))
+        File.Delete(jsonSettingsPath);
 }
 
-void RunFileProviderTests(string tempDirectoryPath)
+void RunFileProviderTests(string settingsPath)
 {
-    string filePath = Path.Combine(tempDirectoryPath, "settings.config");
-    var provider = new FileConfigurationProvider(filePath);
+    File.Delete(settingsPath);
 
-    provider.SetValue("RetryCount", 7.ToString(CultureInfo.InvariantCulture));
-    provider.SetValue("PollInterval", TimeSpan.FromMinutes(2).ToString("c", CultureInfo.InvariantCulture));
+    var settings = new DemoConfiguration
+    {
+        RetryCount = 7,
+        PollInterval = TimeSpan.FromMinutes(2),
+    };
 
-    AssertEqual("7", provider.GetValue("RetryCount"), "File provider should return the stored integer value.");
-    AssertEqual("00:02:00", provider.GetValue("PollInterval"), "File provider should return the stored TimeSpan value.");
+    settings.SaveSettings();
+
+    var loadedSettings = new DemoConfiguration();
+    loadedSettings.LoadSettings();
+
+    AssertEqual(7, loadedSettings.RetryCount, "File provider should load the stored integer value.");
+    AssertEqual(TimeSpan.FromMinutes(2), loadedSettings.PollInterval, "File provider should load the stored TimeSpan value.");
 }
 
-void RunJsonProviderTests(string tempDirectoryPath)
+void RunJsonProviderTests(string settingsPath)
 {
-    string filePath = Path.Combine(tempDirectoryPath, "appsettings.json");
-    var provider = new ConfigurationManagerConfigurationProvider(filePath);
+    File.Delete(settingsPath);
 
-    provider.SetValue("ApplicationName", "Reflection Demo");
-    provider.SetValue("ScaleFactor", 1.5f.ToString(CultureInfo.InvariantCulture));
+    var settings = new DemoConfiguration
+    {
+        ApplicationName = "Reflection Demo",
+        ScaleFactor = 1.5f,
+    };
 
-    AssertEqual("Reflection Demo", provider.GetValue("ApplicationName"), "JSON provider should return the stored string value.");
-    AssertEqual("1.5", provider.GetValue("ScaleFactor"), "JSON provider should return the stored float value.");
+    settings.SaveSettings();
+
+    var loadedSettings = new DemoConfiguration();
+    loadedSettings.LoadSettings();
+
+    AssertEqual("Reflection Demo", loadedSettings.ApplicationName, "JSON provider should load the stored string value.");
+    AssertEqual(1.5f, loadedSettings.ScaleFactor, "JSON provider should load the stored float value.");
 }
 
-void RunBaseClassRoundtripTests(string tempDirectoryPath)
+void RunBaseClassRoundtripTests(string roundtripFileSettingsPath, string roundtripJsonSettingsPath)
 {
-    string filePath = Path.Combine(tempDirectoryPath, "settings.config");
-    string jsonPath = Path.Combine(tempDirectoryPath, "appsettings.json");
+    File.Delete(roundtripFileSettingsPath);
+    File.Delete(roundtripJsonSettingsPath);
 
-    var writer = new TestConfigurationComponent(
-        new FileConfigurationProvider(filePath),
-        new ConfigurationManagerConfigurationProvider(jsonPath))
+    var writer = new DemoConfiguration
     {
         RetryCount = 11,
         PollInterval = TimeSpan.FromSeconds(45),
@@ -59,9 +73,7 @@ void RunBaseClassRoundtripTests(string tempDirectoryPath)
     };
     writer.SaveSettings();
 
-    var reader = new TestConfigurationComponent(
-        new FileConfigurationProvider(filePath),
-        new ConfigurationManagerConfigurationProvider(jsonPath));
+    var reader = new DemoConfiguration();
     reader.LoadSettings();
 
     AssertEqual(11, reader.RetryCount, "Base class should load integer properties.");
@@ -74,29 +86,4 @@ static void AssertEqual<T>(T expected, T actual, string message)
 {
     if (!Equals(expected, actual))
         throw new InvalidOperationException($"{message} Expected: {expected}, Actual: {actual}");
-}
-
-internal sealed class TestConfigurationComponent(FileConfigurationProvider fileProvider, ConfigurationManagerConfigurationProvider jsonProvider) : ConfigurationComponentBase
-{
-    [ConfigurationItem("RetryCount", ConfigurationProviderType.File)]
-    public int RetryCount { get; set; }
-
-    [ConfigurationItem("PollInterval", ConfigurationProviderType.File)]
-    public TimeSpan PollInterval { get; set; }
-
-    [ConfigurationItem("ApplicationName", ConfigurationProviderType.ConfigurationManager)]
-    public string ApplicationName { get; set; } = string.Empty;
-
-    [ConfigurationItem("ScaleFactor", ConfigurationProviderType.ConfigurationManager)]
-    public float ScaleFactor { get; set; }
-
-    protected override IConfigurationProvider GetProvider(ConfigurationProviderType providerType)
-    {
-        return providerType switch
-        {
-            ConfigurationProviderType.File => fileProvider,
-            ConfigurationProviderType.ConfigurationManager => jsonProvider,
-            _ => throw new ArgumentOutOfRangeException(nameof(providerType), providerType, null),
-        };
-    }
 }

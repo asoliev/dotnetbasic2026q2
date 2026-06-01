@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Reflection;
+using Task1.Contracts;
 
 namespace Task1;
 
@@ -35,7 +36,7 @@ public abstract class ConfigurationComponentBase
         }
     }
 
-    protected abstract IConfigurationProvider GetProvider(ConfigurationProviderType providerType);
+    private static IConfigurationProvider GetProvider(ConfigurationProviderType providerType) => ProviderRegistry.GetProvider(providerType);
 
     private IEnumerable<PropertyInfo> GetConfiguredProperties()
     {
@@ -74,12 +75,6 @@ public abstract class ConfigurationComponentBase
     }
 }
 
-public enum ConfigurationProviderType
-{
-    File,
-    ConfigurationManager,
-}
-
 [AttributeUsage(AttributeTargets.Property, AllowMultiple = false, Inherited = true)]
 public sealed class ConfigurationItemAttribute(string settingName, ConfigurationProviderType providerType) : Attribute
 {
@@ -87,11 +82,4 @@ public sealed class ConfigurationItemAttribute(string settingName, Configuration
     public string SettingName { get; } = settingName;
 
     public ConfigurationProviderType ProviderType { get; } = providerType;
-}
-
-public interface IConfigurationProvider
-{
-    string? GetValue(string settingName);
-
-    void SetValue(string settingName, string value);
 }

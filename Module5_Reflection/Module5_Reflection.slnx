@@ -1,4 +1,7 @@
 <Solution>
+  <Project Path="Task1.Contracts\Task1.Contracts.csproj" />
+  <Project Path="Task1.FileConfigurationProviderPlugin\Task1.FileConfigurationProviderPlugin.csproj" />
+  <Project Path="Task1.ConfigurationManagerProviderPlugin\Task1.ConfigurationManagerProviderPlugin.csproj" />
   <Project Path="Task1\Task1.csproj" />
   <Project Path="Task1.Tests\Task1.Tests.csproj" />
 </Solution>
