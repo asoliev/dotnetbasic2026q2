@@ -1,53 +1,37 @@
+using Microsoft.Extensions.Configuration;
 using System.Text.Json;
 using Task1.Contracts;
 
 namespace Task1.ConfigurationManagerProviderPlugin;
 
 [ConfigurationProvider(ConfigurationProviderType.ConfigurationManager)]
-public sealed class ConfigurationManagerConfigurationProvider : IConfigurationProvider
+public sealed class ConfigurationManagerConfigurationProvider : Task1.Contracts.IConfigurationProvider
 {
     private readonly string filePath = Path.Combine(AppContext.BaseDirectory, "appsettings.json");
+    private readonly ConfigurationManager configurationManager;
 
-    public string? GetValue(string settingName) => LoadValues().GetValueOrDefault(settingName);
+    public ConfigurationManagerConfigurationProvider()
+    {
+        configurationManager = new ConfigurationManager();
+        configurationManager.SetBasePath(AppContext.BaseDirectory);
+        configurationManager.AddJsonFile("appsettings.json", optional: true, reloadOnChange: false);
+    }
+
+    public string? GetValue(string settingName) => configurationManager[settingName];
 
     public void SetValue(string settingName, string value)
     {
-        Dictionary<string, string> values = LoadValues();
-        values[settingName] = value;
-        SaveValues(values);
+        configurationManager[settingName] = value;
+        SaveValues();
     }
 
-    private Dictionary<string, string> LoadValues()
+    private void SaveValues()
     {
-        if (!File.Exists(filePath))
-            return new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        Dictionary<string, string> values = configurationManager
+            .AsEnumerable()
+            .Where(pair => pair.Value is not null)
+            .ToDictionary(pair => pair.Key, pair => pair.Value!, StringComparer.OrdinalIgnoreCase);
 
-        using FileStream stream = File.OpenRead(filePath);
-        using var document = JsonDocument.Parse(stream);
-
-        if (document.RootElement.ValueKind != JsonValueKind.Object)
-            return new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-
-        var values = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-
-        foreach (JsonProperty property in document.RootElement.EnumerateObject())
-        {
-            values[property.Name] = property.Value.ValueKind switch
-            {
-                JsonValueKind.String => property.Value.GetString() ?? string.Empty,
-                JsonValueKind.Number => property.Value.ToString(),
-                JsonValueKind.True => bool.TrueString,
-                JsonValueKind.False => bool.FalseString,
-                JsonValueKind.Null => string.Empty,
-                _ => property.Value.ToString(),
-            };
-        }
-
-        return values;
-    }
-
-    private void SaveValues(Dictionary<string, string> values)
-    {
         string json = JsonSerializer.Serialize(values, new JsonSerializerOptions
         {
             WriteIndented = true,
