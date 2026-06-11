@@ -12,7 +12,6 @@ public class HybridFlowProcessor<T> : IHybridFlowProcessor<T>
         EnsureNotEmpty();
         return _storage.RemoveAt(0);
     }
-
     public void Enqueue(T item) => _storage.Add(item);
 
     public T Pop()
@@ -20,14 +19,11 @@ public class HybridFlowProcessor<T> : IHybridFlowProcessor<T>
         EnsureNotEmpty();
         return _storage.RemoveAt(_storage.Length - 1);
     }
-
     public void Push(T item) => _storage.Add(item);
 
     private void EnsureNotEmpty()
     {
         if (_storage.Length == 0)
-        {
             throw new InvalidOperationException();
-        }
     }
 }

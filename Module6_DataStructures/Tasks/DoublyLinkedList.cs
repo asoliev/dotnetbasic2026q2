@@ -1,6 +1,4 @@
-﻿#nullable enable
-
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using Tasks.DoNotChange;
@@ -12,9 +10,7 @@ public class DoublyLinkedList<T> : IDoublyLinkedList<T>
     private sealed class Node(T value)
     {
         public T Value { get; } = value;
-
         public Node? Previous { get; set; }
-
         public Node? Next { get; set; }
     }
 
@@ -22,15 +18,11 @@ public class DoublyLinkedList<T> : IDoublyLinkedList<T>
     private Node? _tail;
 
     public int Length { get; private set; }
-
     public void Add(T e) => AddAt(Length, e);
-
     public void AddAt(int index, T e)
     {
         ValidateInsertIndex(index);
-
         Node newNode = new(e);
-
         if (Length == 0)
         {
             _head = _tail = newNode;
@@ -57,18 +49,15 @@ public class DoublyLinkedList<T> : IDoublyLinkedList<T>
             previous.Next = newNode;
             current.Previous = newNode;
         }
-
         Length++;
     }
 
     public T ElementAt(int index) => GetNodeAt(index).Value;
-
     public IEnumerator<T> GetEnumerator() => new Enumerator(_head);
 
     public void Remove(T item)
     {
         Node? current = _head;
-
         while (current is not null)
         {
             if (EqualityComparer<T>.Default.Equals(current.Value, item))
@@ -76,11 +65,9 @@ public class DoublyLinkedList<T> : IDoublyLinkedList<T>
                 RemoveNode(current);
                 return;
             }
-
             current = current.Next;
         }
     }
-
     public T RemoveAt(int index)
     {
         Node node = GetNodeAt(index);
@@ -96,36 +83,26 @@ public class DoublyLinkedList<T> : IDoublyLinkedList<T>
     private static void ValidateInsertIndex(int index)
     {
         if (index < 0)
-        {
             throw new IndexOutOfRangeException();
-        }
     }
 
     private Node GetNodeAt(int index)
     {
         if (index < 0 || index >= Length)
-        {
             throw new IndexOutOfRangeException();
-        }
 
         if (index <= Length / 2)
         {
             Node current = _head!;
-
             for (int i = 0; i < index; i++)
-            {
                 current = current.Next!;
-            }
 
             return current;
         }
 
         Node tail = _tail!;
-
         for (int i = Length - 1; i > index; i--)
-        {
             tail = tail.Previous!;
-        }
 
         return tail;
     }
@@ -135,23 +112,11 @@ public class DoublyLinkedList<T> : IDoublyLinkedList<T>
         Node? previous = node.Previous;
         Node? next = node.Next;
 
-        if (previous is null)
-        {
-            _head = next;
-        }
-        else
-        {
-            previous.Next = next;
-        }
+        if (previous is null) _head = next;
+        else previous.Next = next;
 
-        if (next is null)
-        {
-            _tail = previous;
-        }
-        else
-        {
-            next.Previous = previous;
-        }
+        if (next is null) _tail = previous;
+        else next.Previous = previous;
 
         Length--;
     }
@@ -162,7 +127,6 @@ public class DoublyLinkedList<T> : IDoublyLinkedList<T>
         private bool _started;
 
         public T Current => _current!.Value;
-
         object IEnumerator.Current => _current!.Value!;
 
         public bool MoveNext()
@@ -176,7 +140,6 @@ public class DoublyLinkedList<T> : IDoublyLinkedList<T>
             {
                 _current = _current?.Next;
             }
-
             return _current is not null;
         }
 
@@ -185,7 +148,6 @@ public class DoublyLinkedList<T> : IDoublyLinkedList<T>
             _started = false;
             _current = null;
         }
-
         public void Dispose() { }
     }
 }
