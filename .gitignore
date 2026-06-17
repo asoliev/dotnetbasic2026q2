@@ -23,6 +23,7 @@ Thumbs.db
 
 # VS Code (if used)
 .vscode/
+.dotnet-temp/
 
 # User-specific files
 *.swp
