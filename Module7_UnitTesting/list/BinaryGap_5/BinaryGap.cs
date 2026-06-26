@@ -5,10 +5,7 @@ public static class BinaryGap
 {
     public static int Solution(int number)
     {
-        if (number < 1)
-        {
-            throw new ArgumentOutOfRangeException(nameof(number));
-        }
+        ArgumentOutOfRangeException.ThrowIfLessThan(number, 1);
 
         int longestGap = 0;
         int currentGap = 0;
