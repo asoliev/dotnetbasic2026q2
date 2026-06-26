@@ -1,13 +1,12 @@
-﻿namespace Tasks.DoNotChange
+﻿namespace Tasks.DoNotChange;
+
+public interface IHybridFlowProcessor<T>
 {
-    public interface IHybridFlowProcessor<T>
-    {
-        void Push(T item);
+    void Push(T item);
 
-        T Pop();
+    T Pop();
 
-        void Enqueue(T item);
+    void Enqueue(T item);
 
-        T Dequeue();
-    }
+    T Dequeue();
 }
