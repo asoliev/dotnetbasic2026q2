@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
@@ -7,55 +8,47 @@ using BrainstormSessions.Core.Model;
 using BrainstormSessions.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 
-namespace BrainstormSessions.Controllers
+namespace BrainstormSessions.Controllers;
+
+public class HomeController(IBrainstormSessionRepository sessionRepository) : Controller
 {
-    public class HomeController : Controller
+    public async Task<IActionResult> Index()
     {
-        private readonly IBrainstormSessionRepository _sessionRepository;
+        List<BrainstormSession> sessionList = await sessionRepository.ListAsync();
 
-        public HomeController(IBrainstormSessionRepository sessionRepository)
+        IEnumerable<StormSessionViewModel> model = sessionList.Select(session => new StormSessionViewModel()
         {
-            _sessionRepository = sessionRepository;
+            Id = session.Id,
+            DateCreated = session.DateCreated,
+            Name = session.Name,
+            IdeaCount = session.Ideas.Count
+        });
+
+        return View(model);
+    }
+
+    public class NewSessionModel
+    {
+        [Required]
+        public string SessionName { get; set; }
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> Index(NewSessionModel model)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
         }
-
-        public async Task<IActionResult> Index()
+        else
         {
-            var sessionList = await _sessionRepository.ListAsync();
-
-            var model = sessionList.Select(session => new StormSessionViewModel()
+            await sessionRepository.AddAsync(new BrainstormSession()
             {
-                Id = session.Id,
-                DateCreated = session.DateCreated,
-                Name = session.Name,
-                IdeaCount = session.Ideas.Count
+                DateCreated = DateTimeOffset.Now,
+                Name = model.SessionName
             });
-
-            return View(model);
         }
 
-        public class NewSessionModel
-        {
-            [Required]
-            public string SessionName { get; set; }
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> Index(NewSessionModel model)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-            else
-            {
-                await _sessionRepository.AddAsync(new BrainstormSession()
-                {
-                    DateCreated = DateTimeOffset.Now,
-                    Name = model.SessionName
-                });
-            }
-
-            return RedirectToAction(actionName: nameof(Index));
-        }
+        return RedirectToAction(actionName: nameof(Index));
     }
 }

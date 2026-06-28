@@ -5,42 +5,34 @@ using BrainstormSessions.Core.Interfaces;
 using BrainstormSessions.Core.Model;
 using Microsoft.EntityFrameworkCore;
 
-namespace BrainstormSessions.Infrastructure
+namespace BrainstormSessions.Infrastructure;
+
+public class EFStormSessionRepository(AppDbContext dbContext) : IBrainstormSessionRepository
 {
-    public class EFStormSessionRepository : IBrainstormSessionRepository
+    public Task<BrainstormSession> GetByIdAsync(int id)
     {
-        private readonly AppDbContext _dbContext;
+        return dbContext.BrainstormSessions
+            .Include(s => s.Ideas)
+            .FirstOrDefaultAsync(s => s.Id == id);
+    }
 
-        public EFStormSessionRepository(AppDbContext dbContext)
-        {
-            _dbContext = dbContext;
-        }
+    public Task<List<BrainstormSession>> ListAsync()
+    {
+        return dbContext.BrainstormSessions
+            .Include(s => s.Ideas)
+            .OrderByDescending(s => s.DateCreated)
+            .ToListAsync();
+    }
 
-        public Task<BrainstormSession> GetByIdAsync(int id)
-        {
-            return _dbContext.BrainstormSessions
-                .Include(s => s.Ideas)
-                .FirstOrDefaultAsync(s => s.Id == id);
-        }
+    public Task AddAsync(BrainstormSession session)
+    {
+        dbContext.BrainstormSessions.Add(session);
+        return dbContext.SaveChangesAsync();
+    }
 
-        public Task<List<BrainstormSession>> ListAsync()
-        {
-            return _dbContext.BrainstormSessions
-                .Include(s => s.Ideas)
-                .OrderByDescending(s => s.DateCreated)
-                .ToListAsync();
-        }
-
-        public Task AddAsync(BrainstormSession session)
-        {
-            _dbContext.BrainstormSessions.Add(session);
-            return _dbContext.SaveChangesAsync();
-        }
-
-        public Task UpdateAsync(BrainstormSession session)
-        {
-            _dbContext.Entry(session).State = EntityState.Modified;
-            return _dbContext.SaveChangesAsync();
-        }
+    public Task UpdateAsync(BrainstormSession session)
+    {
+        dbContext.Entry(session).State = EntityState.Modified;
+        return dbContext.SaveChangesAsync();
     }
 }
