@@ -19,6 +19,13 @@ public class LoggingTests : IDisposable
     {
     }
 
+    private static Mock<ILogger<T>> CreateEnabledLoggerMock<T>()
+    {
+        var mockLogger = new Mock<ILogger<T>>();
+        mockLogger.Setup(logger => logger.IsEnabled(It.IsAny<LogLevel>())).Returns(true);
+        return mockLogger;
+    }
+
     [Fact]
     public async Task HomeController_Index_LogInfoMessages()
     {
@@ -26,7 +33,7 @@ public class LoggingTests : IDisposable
         var mockRepo = new Mock<IBrainstormSessionRepository>();
         mockRepo.Setup(repo => repo.ListAsync())
             .ReturnsAsync(GetTestSessions());
-        var mockLogger = new Mock<ILogger<HomeController>>();
+        var mockLogger = CreateEnabledLoggerMock<HomeController>();
         var controller = new HomeController(mockRepo.Object, mockLogger.Object);
 
         // Act
@@ -43,7 +50,7 @@ public class LoggingTests : IDisposable
         var mockRepo = new Mock<IBrainstormSessionRepository>();
         mockRepo.Setup(repo => repo.ListAsync())
             .ReturnsAsync(GetTestSessions());
-        var mockLogger = new Mock<ILogger<HomeController>>();
+        var mockLogger = CreateEnabledLoggerMock<HomeController>();
         var controller = new HomeController(mockRepo.Object, mockLogger.Object);
         controller.ModelState.AddModelError("SessionName", "Required");
         var newSession = new HomeController.NewSessionModel();
@@ -60,7 +67,7 @@ public class LoggingTests : IDisposable
     {
         // Arrange & Act
         var mockRepo = new Mock<IBrainstormSessionRepository>();
-        var mockLogger = new Mock<ILogger<IdeasController>>();
+        var mockLogger = CreateEnabledLoggerMock<IdeasController>();
         var controller = new IdeasController(mockRepo.Object, mockLogger.Object);
         controller.ModelState.AddModelError("error", "some error");
 
@@ -80,7 +87,7 @@ public class LoggingTests : IDisposable
         mockRepo.Setup(repo => repo.GetByIdAsync(testSessionId))
             .ReturnsAsync(GetTestSessions().FirstOrDefault(
                 s => s.Id == testSessionId));
-        var mockLogger = new Mock<ILogger<SessionController>>();
+        var mockLogger = CreateEnabledLoggerMock<SessionController>();
         var controller = new SessionController(mockRepo.Object, mockLogger.Object);
 
         // Act

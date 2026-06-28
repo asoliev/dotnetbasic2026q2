@@ -7,7 +7,7 @@ using Microsoft.Extensions.Logging;
 
 namespace BrainstormSessions.Controllers;
 
-public class SessionController(
+public partial class SessionController(
     IBrainstormSessionRepository sessionRepository,
     ILogger<SessionController> logger) : Controller
 {
@@ -15,21 +15,21 @@ public class SessionController(
     {
         if (!id.HasValue)
         {
-            logger.LogDebug("Session index request did not include a session id.");
+            LogSessionIndexMissingId(logger);
             return RedirectToAction(actionName: nameof(Index),
                 controllerName: "Home");
         }
 
-        logger.LogDebug("Loading session with id {SessionId}.", id.Value);
+        LogLoadingSession(logger, id.Value);
 
         BrainstormSession session = await sessionRepository.GetByIdAsync(id.Value);
         if (session == null)
         {
-            logger.LogError("Session with id {SessionId} was not found.", id.Value);
+            LogSessionNotFound(logger, id.Value);
             return Content("Session not found.");
         }
 
-        logger.LogInformation("Loaded session with id {SessionId}.", session.Id);
+        LogLoadedSession(logger, session.Id);
 
         var viewModel = new StormSessionViewModel()
         {
@@ -38,8 +38,23 @@ public class SessionController(
             Id = session.Id
         };
 
-        logger.LogDebug("Prepared session view model for session {SessionId}.", session.Id);
+        LogPreparedSessionViewModel(logger, session.Id);
 
         return View(viewModel);
     }
+
+    [LoggerMessage(Level = LogLevel.Debug, Message = "Session index request did not include a session id.")]
+    private static partial void LogSessionIndexMissingId(ILogger logger);
+
+    [LoggerMessage(Level = LogLevel.Debug, Message = "Loading session with id {SessionId}.")]
+    private static partial void LogLoadingSession(ILogger logger, int sessionId);
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Session with id {SessionId} was not found.")]
+    private static partial void LogSessionNotFound(ILogger logger, int sessionId);
+
+    [LoggerMessage(Level = LogLevel.Debug, Message = "Prepared session view model for session {SessionId}.")]
+    private static partial void LogPreparedSessionViewModel(ILogger logger, int sessionId);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Loaded session with id {SessionId}.")]
+    private static partial void LogLoadedSession(ILogger logger, int sessionId);
 }
