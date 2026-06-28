@@ -31,7 +31,7 @@ public partial class SessionController(
 
         LogLoadedSession(logger, session.Id);
 
-        var viewModel = new StormSessionViewModel()
+        StormSessionViewModel viewModel = new()
         {
             DateCreated = session.DateCreated,
             Name = session.Name,

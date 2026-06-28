@@ -6,22 +6,17 @@ using BrainstormSessions.Api;
 using BrainstormSessions.Controllers;
 using BrainstormSessions.Core.Interfaces;
 using BrainstormSessions.Core.Model;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
 
 namespace BrainstormSessions.Test.UnitTests;
 
-public class LoggingTests : IDisposable
+public class LoggingTests
 {
-    public void Dispose()
-    {
-    }
-
     private static Mock<ILogger<T>> CreateEnabledLoggerMock<T>()
     {
-        var mockLogger = new Mock<ILogger<T>>();
+        Mock<ILogger<T>> mockLogger = new();
         mockLogger.Setup(logger => logger.IsEnabled(It.IsAny<LogLevel>())).Returns(true);
         return mockLogger;
     }
@@ -30,14 +25,14 @@ public class LoggingTests : IDisposable
     public async Task HomeController_Index_LogInfoMessages()
     {
         // Arrange
-        var mockRepo = new Mock<IBrainstormSessionRepository>();
+        Mock<IBrainstormSessionRepository> mockRepo = new();
         mockRepo.Setup(repo => repo.ListAsync())
             .ReturnsAsync(GetTestSessions());
-        var mockLogger = CreateEnabledLoggerMock<HomeController>();
-        var controller = new HomeController(mockRepo.Object, mockLogger.Object);
+        Mock<ILogger<HomeController>> mockLogger = CreateEnabledLoggerMock<HomeController>();
+        HomeController controller = new(mockRepo.Object, mockLogger.Object);
 
         // Act
-        IActionResult result = await controller.Index();
+        await controller.Index();
 
         // Assert
         VerifyLog(mockLogger, LogLevel.Information, Times.AtLeastOnce());
@@ -47,16 +42,16 @@ public class LoggingTests : IDisposable
     public async Task HomeController_IndexPost_LogWarningMessage_WhenModelStateIsInvalid()
     {
         // Arrange
-        var mockRepo = new Mock<IBrainstormSessionRepository>();
+        Mock<IBrainstormSessionRepository> mockRepo = new();
         mockRepo.Setup(repo => repo.ListAsync())
             .ReturnsAsync(GetTestSessions());
-        var mockLogger = CreateEnabledLoggerMock<HomeController>();
-        var controller = new HomeController(mockRepo.Object, mockLogger.Object);
+        Mock<ILogger<HomeController>> mockLogger = CreateEnabledLoggerMock<HomeController>();
+        HomeController controller = new(mockRepo.Object, mockLogger.Object);
         controller.ModelState.AddModelError("SessionName", "Required");
-        var newSession = new HomeController.NewSessionModel();
+        HomeController.NewSessionModel newSession = new();
 
         // Act
-        IActionResult result = await controller.Index(newSession);
+        await controller.Index(newSession);
 
         // Assert
         VerifyLog(mockLogger, LogLevel.Error, Times.AtLeastOnce());
@@ -66,13 +61,13 @@ public class LoggingTests : IDisposable
     public async Task IdeasController_CreateActionResult_LogErrorMessage_WhenModelStateIsInvalid()
     {
         // Arrange & Act
-        var mockRepo = new Mock<IBrainstormSessionRepository>();
-        var mockLogger = CreateEnabledLoggerMock<IdeasController>();
-        var controller = new IdeasController(mockRepo.Object, mockLogger.Object);
+        Mock<IBrainstormSessionRepository> mockRepo = new();
+        Mock<ILogger<IdeasController>> mockLogger = CreateEnabledLoggerMock<IdeasController>();
+        IdeasController controller = new(mockRepo.Object, mockLogger.Object);
         controller.ModelState.AddModelError("error", "some error");
 
         // Act
-        ActionResult<BrainstormSession> result = await controller.CreateActionResult(model: null);
+        await controller.CreateActionResult(model: null);
 
         // Assert
         VerifyLog(mockLogger, LogLevel.Error, Times.AtLeastOnce());
@@ -82,16 +77,16 @@ public class LoggingTests : IDisposable
     public async Task SessionController_Index_LogDebugMessages()
     {
         // Arrange
-        int testSessionId = 1;
-        var mockRepo = new Mock<IBrainstormSessionRepository>();
+        const int testSessionId = 1;
+        Mock<IBrainstormSessionRepository> mockRepo = new();
         mockRepo.Setup(repo => repo.GetByIdAsync(testSessionId))
             .ReturnsAsync(GetTestSessions().FirstOrDefault(
                 s => s.Id == testSessionId));
-        var mockLogger = CreateEnabledLoggerMock<SessionController>();
-        var controller = new SessionController(mockRepo.Object, mockLogger.Object);
+        Mock<ILogger<SessionController>> mockLogger = CreateEnabledLoggerMock<SessionController>();
+        SessionController controller = new(mockRepo.Object, mockLogger.Object);
 
         // Act
-        IActionResult result = await controller.Index(testSessionId);
+        await controller.Index(testSessionId);
 
         // Assert
         VerifyLog(mockLogger, LogLevel.Debug, Times.Exactly(2));
@@ -109,22 +104,19 @@ public class LoggingTests : IDisposable
             times);
     }
 
-    private static List<BrainstormSession> GetTestSessions()
-    {
-        return [
-            new()
-            {
-                DateCreated = new DateTime(2016, 7, 2),
-                Id = 1,
-                Name = "Test One"
-            },
-            new()
-            {
-                DateCreated = new DateTime(2016, 7, 1),
-                Id = 2,
-                Name = "Test Two"
-            }
-        ];
-    }
-
+    private static List<BrainstormSession> GetTestSessions() =>
+    [
+        new()
+        {
+            DateCreated = new DateTime(2016, 7, 2),
+            Id = 1,
+            Name = "Test One"
+        },
+        new()
+        {
+            DateCreated = new DateTime(2016, 7, 1),
+            Id = 2,
+            Name = "Test Two"
+        }
+    ];
 }

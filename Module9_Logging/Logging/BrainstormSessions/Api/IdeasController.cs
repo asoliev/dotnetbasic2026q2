@@ -30,13 +30,13 @@ public partial class IdeasController(
 
         LogLoadedIdeasForSession(logger, session.Ideas.Count, sessionId);
 
-        var result = session.Ideas.Select(idea => new IdeaDTO()
+        List<IdeaDTO> result = [.. session.Ideas.Select(idea => new IdeaDTO()
         {
             Id = idea.Id,
             Name = idea.Name,
             Description = idea.Description,
             DateCreated = idea.DateCreated
-        }).ToList();
+        })];
 
         return Ok(result);
     }
@@ -59,7 +59,7 @@ public partial class IdeasController(
             return NotFound(model.SessionId);
         }
 
-        var idea = new Idea()
+        Idea idea = new()
         {
             DateCreated = DateTimeOffset.Now,
             Description = model.Description,
@@ -93,13 +93,13 @@ public partial class IdeasController(
 
         LogLoadedIdeasActionResult(logger, sessionId, session.Ideas.Count);
 
-        var result = session.Ideas.Select(idea => new IdeaDTO()
+        List<IdeaDTO> result = [.. session.Ideas.Select(idea => new IdeaDTO()
         {
             Id = idea.Id,
             Name = idea.Name,
             Description = idea.Description,
             DateCreated = idea.DateCreated
-        }).ToList();
+        })];
 
         return result;
     }
@@ -128,7 +128,7 @@ public partial class IdeasController(
             return NotFound(model.SessionId);
         }
 
-        var idea = new Idea()
+        Idea idea = new()
         {
             DateCreated = DateTimeOffset.Now,
             Description = model.Description,

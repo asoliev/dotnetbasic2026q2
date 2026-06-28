@@ -50,7 +50,7 @@ public partial class HomeController(
 
         LogCreatingBrainstormSession(logger, model.SessionName);
 
-        await sessionRepository.AddAsync(new BrainstormSession()
+        await sessionRepository.AddAsync(new()
         {
             DateCreated = DateTimeOffset.Now,
             Name = model.SessionName

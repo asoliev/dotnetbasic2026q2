@@ -65,13 +65,13 @@ static async Task SeedDatabaseAsync(IBrainstormSessionRepository repo)
 
 static BrainstormSession GetTestSession()
 {
-    var session = new BrainstormSession()
+    BrainstormSession session = new()
     {
         Name = "Test Session 1",
         DateCreated = new DateTime(2016, 8, 1)
     };
 
-    var idea = new Idea()
+    Idea idea = new()
     {
         DateCreated = new DateTime(2016, 8, 1),
         Description = "Totally awesome idea",
