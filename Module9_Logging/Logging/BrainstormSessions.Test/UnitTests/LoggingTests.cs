@@ -6,10 +6,8 @@ using BrainstormSessions.Api;
 using BrainstormSessions.Controllers;
 using BrainstormSessions.Core.Interfaces;
 using BrainstormSessions.Core.Model;
-using log4net.Appender;
-using log4net.Config;
-using log4net.Core;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
 
@@ -17,15 +15,9 @@ namespace BrainstormSessions.Test.UnitTests;
 
 public class LoggingTests : IDisposable
 {
-    private readonly MemoryAppender _appender;
-
-    public LoggingTests()
+    public void Dispose()
     {
-        _appender = new MemoryAppender();
-        BasicConfigurator.Configure(_appender);
     }
-
-    public void Dispose() => _appender.Clear();
 
     [Fact]
     public async Task HomeController_Index_LogInfoMessages()
@@ -34,14 +26,14 @@ public class LoggingTests : IDisposable
         var mockRepo = new Mock<IBrainstormSessionRepository>();
         mockRepo.Setup(repo => repo.ListAsync())
             .ReturnsAsync(GetTestSessions());
-        var controller = new HomeController(mockRepo.Object);
+        var mockLogger = new Mock<ILogger<HomeController>>();
+        var controller = new HomeController(mockRepo.Object, mockLogger.Object);
 
         // Act
         IActionResult result = await controller.Index();
 
         // Assert
-        LoggingEvent[] logEntries = _appender.GetEvents();
-        Assert.True(logEntries.Any(l => l.Level == Level.Info), "Expected Info messages in the logs");
+        VerifyLog(mockLogger, LogLevel.Information, Times.AtLeastOnce());
     }
 
     [Fact]
@@ -51,7 +43,8 @@ public class LoggingTests : IDisposable
         var mockRepo = new Mock<IBrainstormSessionRepository>();
         mockRepo.Setup(repo => repo.ListAsync())
             .ReturnsAsync(GetTestSessions());
-        var controller = new HomeController(mockRepo.Object);
+        var mockLogger = new Mock<ILogger<HomeController>>();
+        var controller = new HomeController(mockRepo.Object, mockLogger.Object);
         controller.ModelState.AddModelError("SessionName", "Required");
         var newSession = new HomeController.NewSessionModel();
 
@@ -59,8 +52,7 @@ public class LoggingTests : IDisposable
         IActionResult result = await controller.Index(newSession);
 
         // Assert
-        LoggingEvent[] logEntries = _appender.GetEvents();
-        Assert.True(logEntries.Any(l => l.Level == Level.Warn), "Expected Warn messages in the logs");
+        VerifyLog(mockLogger, LogLevel.Error, Times.AtLeastOnce());
     }
 
     [Fact]
@@ -68,15 +60,15 @@ public class LoggingTests : IDisposable
     {
         // Arrange & Act
         var mockRepo = new Mock<IBrainstormSessionRepository>();
-        var controller = new IdeasController(mockRepo.Object);
+        var mockLogger = new Mock<ILogger<IdeasController>>();
+        var controller = new IdeasController(mockRepo.Object, mockLogger.Object);
         controller.ModelState.AddModelError("error", "some error");
 
         // Act
         ActionResult<BrainstormSession> result = await controller.CreateActionResult(model: null);
 
         // Assert
-        LoggingEvent[] logEntries = _appender.GetEvents();
-        Assert.True(logEntries.Any(l => l.Level == Level.Error), "Expected Error messages in the logs");
+        VerifyLog(mockLogger, LogLevel.Error, Times.AtLeastOnce());
     }
 
     [Fact]
@@ -88,14 +80,26 @@ public class LoggingTests : IDisposable
         mockRepo.Setup(repo => repo.GetByIdAsync(testSessionId))
             .ReturnsAsync(GetTestSessions().FirstOrDefault(
                 s => s.Id == testSessionId));
-        var controller = new SessionController(mockRepo.Object);
+        var mockLogger = new Mock<ILogger<SessionController>>();
+        var controller = new SessionController(mockRepo.Object, mockLogger.Object);
 
         // Act
         IActionResult result = await controller.Index(testSessionId);
 
         // Assert
-        LoggingEvent[] logEntries = _appender.GetEvents();
-        Assert.True(logEntries.Count(l => l.Level == Level.Debug) == 2, "Expected 2 Debug messages in the logs");
+        VerifyLog(mockLogger, LogLevel.Debug, Times.Exactly(2));
+    }
+
+    private static void VerifyLog<T>(Mock<ILogger<T>> loggerMock, LogLevel logLevel, Times times)
+    {
+        loggerMock.Verify(
+            logger => logger.Log(
+                logLevel,
+                It.IsAny<EventId>(),
+                It.Is<It.IsAnyType>((_, _) => true),
+                It.IsAny<Exception>(),
+                It.IsAny<Func<It.IsAnyType, Exception, string>>()),
+            times);
     }
 
     private static List<BrainstormSession> GetTestSessions()

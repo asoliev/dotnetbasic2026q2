@@ -6,21 +6,29 @@ using BrainstormSessions.ClientModels;
 using BrainstormSessions.Core.Interfaces;
 using BrainstormSessions.Core.Model;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 
 namespace BrainstormSessions.Api;
 
-public class IdeasController(IBrainstormSessionRepository sessionRepository) : ControllerBase
+public class IdeasController(
+    IBrainstormSessionRepository sessionRepository,
+    ILogger<IdeasController> logger) : ControllerBase
 {
 
     #region snippet_ForSessionAndCreate
     [HttpGet("forsession/{sessionId}")]
     public async Task<IActionResult> ForSession(int sessionId)
     {
+        logger.LogDebug("Loading ideas for session {SessionId}.", sessionId);
+
         BrainstormSession session = await sessionRepository.GetByIdAsync(sessionId);
         if (session == null)
         {
+            logger.LogError("Unable to load ideas because session {SessionId} was not found.", sessionId);
             return NotFound(sessionId);
         }
+
+        logger.LogInformation("Loaded {IdeaCount} ideas for session {SessionId}.", session.Ideas.Count, sessionId);
 
         var result = session.Ideas.Select(idea => new IdeaDTO()
         {
@@ -38,12 +46,16 @@ public class IdeasController(IBrainstormSessionRepository sessionRepository) : C
     {
         if (!ModelState.IsValid)
         {
+            logger.LogError("Invalid idea submission received for session {SessionId}.", model?.SessionId);
             return BadRequest(ModelState);
         }
+
+        logger.LogDebug("Creating an idea for session {SessionId}.", model.SessionId);
 
         BrainstormSession session = await sessionRepository.GetByIdAsync(model.SessionId);
         if (session == null)
         {
+            logger.LogError("Unable to create idea because session {SessionId} was not found.", model.SessionId);
             return NotFound(model.SessionId);
         }
 
@@ -57,6 +69,8 @@ public class IdeasController(IBrainstormSessionRepository sessionRepository) : C
 
         await sessionRepository.UpdateAsync(session);
 
+        logger.LogInformation("Created a new idea named {IdeaName} for session {SessionId}.", model.Name, session.Id);
+
         return Ok(session);
     }
     #endregion
@@ -67,12 +81,17 @@ public class IdeasController(IBrainstormSessionRepository sessionRepository) : C
     [ProducesResponseType(404)]
     public async Task<ActionResult<List<IdeaDTO>>> ForSessionActionResult(int sessionId)
     {
+        logger.LogDebug("Loading ideas action result for session {SessionId}.", sessionId);
+
         BrainstormSession session = await sessionRepository.GetByIdAsync(sessionId);
 
         if (session == null)
         {
+            logger.LogError("Unable to load ideas action result because session {SessionId} was not found.", sessionId);
             return NotFound(sessionId);
         }
+
+        logger.LogInformation("Loaded ideas action result for session {SessionId} with {IdeaCount} ideas.", sessionId, session.Ideas.Count);
 
         var result = session.Ideas.Select(idea => new IdeaDTO()
         {
@@ -95,13 +114,17 @@ public class IdeasController(IBrainstormSessionRepository sessionRepository) : C
     {
         if (!ModelState.IsValid)
         {
+            logger.LogError("Invalid idea action result submission received for session {SessionId}.", model?.SessionId);
             return BadRequest(ModelState);
         }
+
+        logger.LogDebug("Creating idea action result for session {SessionId}.", model.SessionId);
 
         BrainstormSession session = await sessionRepository.GetByIdAsync(model.SessionId);
 
         if (session == null)
         {
+            logger.LogError("Unable to create idea action result because session {SessionId} was not found.", model.SessionId);
             return NotFound(model.SessionId);
         }
 
@@ -114,6 +137,8 @@ public class IdeasController(IBrainstormSessionRepository sessionRepository) : C
         session.AddIdea(idea);
 
         await sessionRepository.UpdateAsync(session);
+
+        logger.LogInformation("Created idea action result named {IdeaName} for session {SessionId}.", model.Name, session.Id);
 
         return CreatedAtAction(nameof(CreateActionResult), new { id = session.Id }, session);
     }
