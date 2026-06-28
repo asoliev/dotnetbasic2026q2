@@ -5,6 +5,7 @@ using BrainstormSessions.Core.Interfaces;
 using BrainstormSessions.Core.Model;
 using BrainstormSessions.Infrastructure;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.Configuration;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -13,10 +14,28 @@ using Serilog.Events;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
-builder.Host.UseSerilog((context, services, loggerConfiguration) => loggerConfiguration
-    .ReadFrom.Configuration(context.Configuration)
-    .Enrich.FromLogContext()
-    .WriteTo.Console());
+builder.Host.UseSerilog((context, services, loggerConfiguration) =>
+{
+    loggerConfiguration
+        .ReadFrom.Configuration(context.Configuration)
+        .Enrich.FromLogContext()
+        .WriteTo.Console();
+
+    var emailSection = context.Configuration.GetSection("Serilog:Email");
+    if (bool.TryParse(emailSection["Enabled"], out bool enabled) && enabled)
+    {
+        int port = int.TryParse(emailSection["Port"], out int parsedPort) ? parsedPort : 25;
+
+        loggerConfiguration.WriteTo.Email(
+            from: emailSection["From"]!,
+            to: emailSection["To"]!,
+            host: emailSection["Host"]!,
+            port: port,
+            subject: emailSection["Subject"] ?? "BrainstormSessions error log",
+            body: emailSection["Body"] ?? "{Timestamp} [{Level}] {Message}{NewLine}{Exception}",
+            restrictedToMinimumLevel: LogEventLevel.Error);
+    }
+});
 
 builder.Services.AddDbContext<AppDbContext>(
     optionsBuilder => optionsBuilder.UseInMemoryDatabase("InMemoryDb"));
