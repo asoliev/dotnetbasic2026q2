@@ -5,14 +5,16 @@ public static class OddEven
 {
     public static string Classify(int number)
     {
-        if (number < 1)
-        {
-            throw new ArgumentOutOfRangeException(nameof(number));
-        }
+        ArgumentOutOfRangeException.ThrowIfLessThan(number, 1);
 
         if (number % 2 == 0)
         {
             return "Even";
+        }
+
+        if (number == 1)
+        {
+            return number.ToString();
         }
 
         if (IsPrime(number))

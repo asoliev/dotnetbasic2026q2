@@ -1,5 +1,6 @@
 <Solution>
   <Project Path="list/BinaryGap_5/BinaryGap_5.csproj" />
+  <Project Path="list/FizzBuzz_12/FizzBuzz_12.csproj" />
   <Project Path="list/LeapYear_17/LeapYear_17.csproj" />
   <Project Path="list/OddEven_20/OddEven_20.csproj" />
 </Solution>
